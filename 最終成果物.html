@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar</title>
+<style>
+  #calendar {
+    font-family: Arial, sans-serif;
+  }
+
+  .calendar-header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .calendar-header h2 {
+    margin: 0;
+  }
+
+  .calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .calendar-table th,
+  .calendar-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .calendar-table th {
+    background-color: #f2f2f2;
+  }
+
+  .calendar-table td {
+    cursor: pointer;
+  }
+
+  .calendar-table td.today {
+    background-color: #e6f7ff;
+  }
+
+  .calendar-table td.selected {
+    background-color: #4380c5;
+  }
+  .calendar-table td.saturday,
+  .calendar-table td.sunday {
+    background-color: #ec99c3;}
+</style>
+</head>
+<body>
+<div id="calendar"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const calendar = document.getElementById('calendar');
+    const today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    function renderCalendar() {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+      const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+      const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+
+      const numDays = lastDayOfMonth.getDate();
+      const startingDay = firstDayOfMonth.getDay();
+
+      let html = '<div class="calendar-header"><h2>' + monthNames[currentMonth] + ' ' + currentYear + '</h2></div>';
+      html += '<table class="calendar-table">';
+      html += '<tr>';
+      for (let i = 0; i < 7; i++) {
+        html += '<th>' + daysOfWeek[i] + '</th>';
+      }
+      html += '</tr><tr>';
+
+      let day = 1;
+      for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < 7; j++) {
+          if (day > numDays) {
+            break;
+          }
+          if ((i === 0 && j < startingDay) || (i >= 6 && day > numDays)) {
+            const prevMonthDay = prevMonthLastDay - startingDay + j + 1;
+            const classNames = ['prev-month'];
+      if (j === 0) { // Sunday
+        classNames.push('sunday');
+      }
+      html += '<td class="' + classNames.join(' ') + '">' + prevMonthDay + '</td>';
+    } else {
+            const classNames = [];
+            if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+              classNames.push('today');
+            }
+            if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+              classNames.push('selected');
+            }
+            if (j === 0) { // Sunday
+              classNames.push('sunday');
+            } else if (j === 6) { // Saturday
+              classNames.push('saturday');
+            }
+            html += '<td class="' + classNames.join(' ') + '">' + day + '</td>';
+            day++;
+        }
+          
+        }
+        if (day > numDays) {
+          break;
+        } else {
+          html += '</tr><tr>';
+        }
+      }
+
+      html += '</tr>';
+      html += '</table>';
+      calendar.innerHTML = html;
+
+      const prevMonthButton = document.createElement('button');
+      prevMonthButton.textContent = '←';
+      prevMonthButton.addEventListener('click', function() {
+        currentMonth--;
+        if (currentMonth < 0) {
+          currentMonth = 11;
+          currentYear--;
+        }
+        renderCalendar();
+      });
+
+      const nextMonthButton = document.createElement('button');
+      nextMonthButton.textContent = '→';
+      nextMonthButton.addEventListener('click', function() {
+        currentMonth++;
+        if (currentMonth > 11) {
+          currentMonth = 0;
+          currentYear++;
+        }
+        renderCalendar();
+      });
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.classList.add('button-container');
+      buttonContainer.appendChild(prevMonthButton);
+      buttonContainer.appendChild(nextMonthButton);
+      calendar.insertBefore(buttonContainer, calendar.firstChild);
+    }
+
+    renderCalendar();
+  });
+</script>
+</body>
+</html>
