@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendar</title>
+<title>Calendar with Schedule</title>
 <style>
   #calendar {
     font-family: Arial, sans-serif;
@@ -43,21 +43,55 @@
   }
 
   .calendar-table td.selected {
-    background-color: #4380c5;
+    background-color: #83b6f1;
   }
   .calendar-table td.saturday,
   .calendar-table td.sunday {
-    background-color: #ec99c3;}
+    background-color: #ec99c3;
+  }
+
+  .calendar-table td.current-day {
+    background-color: rgb(129, 215, 241);
+  }
+
+  .memo-input {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 999;
+  }
+
+  .memo-input textarea {
+    width: 80%;
+    height: 100px;
+    margin: 50px auto;
+    display: block;
+    resize: none;
+  }
 </style>
 </head>
 <body>
 <div id="calendar"></div>
+<div id="memoInput" class="memo-input">
+  <textarea id="memoContent"></textarea>
+  <button id="saveMemo">保存</button>
+  <button id="cancelMemo">キャンセル</button>
+</div>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const calendar = document.getElementById('calendar');
+    const memoInput = document.getElementById('memoInput');
+    const memoContent = document.getElementById('memoContent');
+    const saveMemoBtn = document.getElementById('saveMemo');
+    const cancelMemoBtn = document.getElementById('cancelMemo');
     const today = new Date();
     let currentMonth = today.getMonth();
     let currentYear = today.getFullYear();
+    let currentDay = today.getDate();
 
     function renderCalendar() {
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -87,11 +121,11 @@
           if ((i === 0 && j < startingDay) || (i >= 6 && day > numDays)) {
             const prevMonthDay = prevMonthLastDay - startingDay + j + 1;
             const classNames = ['prev-month'];
-      if (j === 0) { // Sunday
-        classNames.push('sunday');
-      }
-      html += '<td class="' + classNames.join(' ') + '">' + prevMonthDay + '</td>';
-    } else {
+            if (j === 0) { // Sunday
+              classNames.push('sunday');
+            }
+            html += '<td class="' + classNames.join(' ') + '">' + prevMonthDay + '</td>';
+          } else {
             const classNames = [];
             if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
               classNames.push('today');
@@ -104,10 +138,13 @@
             } else if (j === 6) { // Saturday
               classNames.push('saturday');
             }
-            html += '<td class="' + classNames.join(' ') + '">' + day + '</td>';
+            if (day === currentDay) {
+              classNames.push('current-day');
+            }
+            // Add click event listener to each day
+            html += '<td class="' + classNames.join(' ') + '" data-day="' + day + '">' + day + '</td>';
             day++;
-        }
-          
+          }
         }
         if (day > numDays) {
           break;
@@ -119,6 +156,15 @@
       html += '</tr>';
       html += '</table>';
       calendar.innerHTML = html;
+
+      // Add click event listener to each day
+      const days = calendar.querySelectorAll('.calendar-table td:not(.prev-month)');
+      days.forEach(day => {
+        day.addEventListener('click', function() {
+          const clickedDay = parseInt(this.getAttribute('data-day'));
+          showMemoInput(clickedDay);
+        });
+      });
 
       const prevMonthButton = document.createElement('button');
       prevMonthButton.textContent = '←';
@@ -150,6 +196,22 @@
     }
 
     renderCalendar();
+
+    // Function to show memo input
+    function showMemoInput(day) {
+      memoContent.value = ''; // Clear previous memo content
+      memoInput.style.display = 'block';
+      saveMemoBtn.addEventListener('click', function() {
+        const memo = memoContent.value;
+        console.log('Memo for day ' + day + ': ' + memo);
+        memoInput.style.display = 'none';
+      });
+      cancelMemoBtn.addEventListener('click', function() {
+        memoInput.style.display =
+        memoInput.style.display = 'none';
+      });
+    }
+
   });
 </script>
 </body>
